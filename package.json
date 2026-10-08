@@ -1,0 +1,41 @@
+{
+  "name": "risk-ai-navigator",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm run dev --workspace=@databricks/chatbot-server",
+    "dev:client": "npm run dev --workspace=@databricks/chatbot-client",
+    "preview:ui": "node scripts/with-env.mjs UI_PREVIEW=true -- npm run dev",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "npm run build --workspace=@databricks/chatbot-client",
+    "build:server": "npm run build --workspace=@databricks/chatbot-server",
+    "start": "npm run start --workspace=@databricks/chatbot-server",
+    "lint": "biome lint --write --unsafe",
+    "lint:fix": "biome lint --write --unsafe && biome format --write",
+    "format": "biome format --write",
+    "preview:dist": "node scripts/with-env.mjs NODE_ENV=production PORT=8000 UI_PREVIEW=true -- node app-dist/server/dist/index.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "tsx": "^4.19.1"
+  },
+  "devDependencies": {
+    "@ai-sdk/provider": "^3.0.5",
+    "@biomejs/biome": "1.9.4",
+    "@types/node": "^22.8.6",
+    "concurrently": "^8.2.2",
+    "tsdown": "0.15.9",
+    "typescript": "^5.9.3"
+  },
+  "description": "RISK AI NAVIGATOR - AI assistant for Techcombank's Risk Management Division"
+}

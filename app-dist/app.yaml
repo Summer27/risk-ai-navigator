@@ -1,0 +1,11 @@
+# Runtime config for the Databricks App.
+# There is deliberately NO package.json in this folder, so the platform does
+# not run `npm install` / `npm run build` (the workspace has no npm access).
+# server/dist/index.mjs already contains every dependency.
+command: ["node", "server/dist/index.mjs"]
+
+env:
+  - name: NODE_ENV
+    value: production
+  - name: DATABRICKS_SERVING_ENDPOINT
+    valueFrom: serving-endpoint

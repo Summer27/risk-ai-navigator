@@ -1,0 +1,7 @@
+# Keep line endings stable when the repo is cloned on Windows.
+* text=auto
+*.sh text eol=lf
+# cmd batch files break (goto/labels) with LF endings
+*.cmd text eol=crlf
+# Prebuilt app: deploy exactly the bytes that were built and tested.
+app-dist/** -text

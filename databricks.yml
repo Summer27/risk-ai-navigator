@@ -1,0 +1,59 @@
+# RISK AI NAVIGATOR - Databricks Asset Bundle
+#
+# Deploys a prebuilt, self-contained Node.js app from ./app-dist.
+# The app container never runs `npm install`: every dependency is already
+# bundled into app-dist/server/dist (see scripts/build-offline.mjs).
+#
+# Requires Databricks CLI >= 0.279.0 (direct deployment engine, no Terraform).
+
+bundle:
+  name: risk-ai-navigator
+  # Deploy with the Databricks Go SDK directly - no Terraform download needed.
+  engine: direct
+
+variables:
+  serving_endpoint_name:
+    description: "Agent Bricks Multi-Agent Supervisor endpoint used by the app"
+    default: "mas-025958-ba-endpoint"
+  app_name:
+    description: "Databricks App name (lowercase, max 30 chars, cannot be changed after first deploy)"
+    default: "risk-ai-navigator"
+
+# The prebuilt app lives in folders that git ignores (dist/); make sure the
+# bundle still uploads them.
+sync:
+  include:
+    - app-dist/**
+
+resources:
+  apps:
+    risk_ai_navigator:
+      name: ${var.app_name}
+      description: >-
+        AI assistant for Techcombank Risk Management: bank-wide asset quality,
+        credit, market and liquidity risk insights in plain language, using
+        each user's own data permissions.
+      source_code_path: ./app-dist
+
+      # On-behalf-of-user (OBO) authorization: the app calls the agent with
+      # the signed-in user's token, so every user only sees the data their
+      # own Unity Catalog / Genie permissions allow.
+      user_api_scopes:
+        - model-serving # call the supervisor endpoint as the user
+        - genie # the supervisor's Genie MCP tools run as the user
+        - sql # Genie executes SQL on the warehouse as the user
+
+      resources:
+        # Also grant the app service principal CAN_QUERY (used for reading
+        # the endpoint's metadata at startup).
+        - name: serving-endpoint
+          description: "Agent Bricks supervisor endpoint for RISK AI NAVIGATOR"
+          serving_endpoint:
+            name: ${var.serving_endpoint_name}
+            permission: CAN_QUERY
+
+targets:
+  prod:
+    default: true
+    # No `mode: development`, so the app keeps its exact name
+    # (development mode would prefix it with "[dev <user>]").
